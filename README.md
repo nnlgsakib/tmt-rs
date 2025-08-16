@@ -138,6 +138,111 @@ The implementation relies on the following external Rust crates:
 
 The TMT includes a suite of unit tests to ensure correctness and reliability. The tests cover core operations like building, updating, verifying, and serialization/deserialization.
 
+# Benchmark
+## 📊 TMT Results
+
+| Operation | Data Size | Avg Time (ms) | Throughput (ops/sec) | Memory (MB) |
+|-----------|-----------|---------------|----------------------|-------------|
+| Build     | 100       | 0.167         | 597228.86            | 0.01        |
+| Verify    | 100       | 0.005         | 204081.63            | 0.01        |
+| Update    | 100       | 0.004         | 245098.04            | 0.01        |
+| Build     | 1000      | 1.642         | 609109.85            | 0.15        |
+| Verify    | 1000      | 0.006         | 166666.67            | 0.15        |
+| Update    | 1000      | 0.005         | 183823.53            | 0.15        |
+| Build     | 10000     | 15.346        | 651619.47            | 1.45        |
+| Verify    | 10000     | 0.008         | 127226.46            | 1.45        |
+| Update    | 10000     | 0.007         | 140449.44            | 1.45        |
+| Build     | 50000     | 74.608        | 670168.70            | 7.25        |
+| Verify    | 50000     | 0.009         | 116009.28            | 7.25        |
+| Update    | 50000     | 0.008         | 127877.24            | 7.25        |
+
+### Concurrent Verify (TMT)
+
+| Threads | Data Size | Avg Time (ms) | Throughput (ops/sec) |
+|---------|-----------|---------------|----------------------|
+| 1       | 1000      | 0.796         | 125565.04            |
+| 1       | 10000     | 1.861         | 53746.10             |
+| 2       | 1000      | 1.194         | 167448.09            |
+| 2       | 10000     | 2.513         | 79576.65             |
+| 4       | 1000      | 2.793         | 143189.55            |
+| 4       | 10000     | 4.371         | 91516.43             |
+| 8       | 1000      | 6.779         | 118018.47            |
+| 8       | 10000     | 6.582         | 121541.76            |
+
+### Stress Build (TMT)
+
+| Data Size | Avg Time (ms) | Throughput (ops/sec) | Memory (MB) |
+|-----------|---------------|----------------------|-------------|
+| 100000    | 156.745       | 637978.07            | 14.50       |
+| 500000    | 578.759       | 863917.45            | 72.48       |
+
+## 📊 Merkle Results
+
+| Operation | Data Size | Avg Time (ms) | Throughput (ops/sec) | Memory (MB) |
+|-----------|-----------|---------------|----------------------|-------------|
+| Build     | 100       | 0.154         | 648424.33            | 0.02        |
+| Verify    | 100       | 0.013         | 77279.75             | 0.02        |
+| Update    | 100       | 0.013         | 75872.53             | 0.02        |
+| Build     | 1000      | 1.632         | 612647.49            | 0.17        |
+| Verify    | 1000      | 0.146         | 6837.14              | 0.17        |
+| Update    | 1000      | 0.145         | 6916.59              | 0.17        |
+| Build     | 10000     | 15.194        | 658171.86            | 1.68        |
+| Verify    | 10000     | 1.980         | 504.95               | 1.68        |
+| Update    | 10000     | 1.977         | 505.69               | 1.68        |
+| Build     | 50000     | 73.208        | 682989.57            | 8.39        |
+| Verify    | 50000     | 11.570        | 86.43                | 8.39        |
+| Update    | 50000     | 11.477        | 87.13                | 8.39        |
+
+### Stress Build (Merkle)
+
+| Data Size | Avg Time (ms) | Throughput (ops/sec) | Memory (MB) |
+|-----------|---------------|----------------------|-------------|
+| 100000    | 148.451       | 673622.04            | 16.79       |
+| 500000    | 524.615       | 953080.79            | 83.92       |
+
+## 🔍 Performance Comparisons and Scoring
+
+**Scoring**: +1 for better Avg Time (lower), Throughput (higher), Memory (lower) per data size.
+
+### Build Comparison
+
+| Data Size | TMT Time | Merkle Time | TMT TPut | Merkle TPut | TMT Mem | Merkle Mem | Winner |
+|-----------|----------|-------------|----------|-------------|---------|------------|--------|
+| 100       | 0.167    | 0.154       | 597228.86 | 648424.33   | 0.01    | 0.02       | Merkle |
+| 1000      | 1.642    | 1.632       | 609109.85 | 612647.49   | 0.15    | 0.17       | Merkle |
+| 10000     | 15.346   | 15.194      | 651619.47 | 658171.86   | 1.45    | 1.68       | Merkle |
+| 50000     | 74.608   | 73.208      | 670168.70 | 682989.57   | 7.25    | 8.39       | Merkle |
+
+### Verify Comparison
+
+| Data Size | TMT Time | Merkle Time | TMT TPut | Merkle TPut | TMT Mem | Merkle Mem | Winner |
+|-----------|----------|-------------|----------|-------------|---------|------------|--------|
+| 100       | 0.005    | 0.013       | 204081.63 | 77279.75    | 0.01    | 0.02       | TMT    |
+| 1000      | 0.006    | 0.146       | 166666.67 | 6837.14     | 0.15    | 0.17       | TMT    |
+| 10000     | 0.008    | 1.980       | 127226.46 | 504.95      | 1.45    | 1.68       | TMT    |
+| 50000     | 0.009    | 11.570      | 116009.28 | 86.43       | 7.25    | 8.39       | TMT    |
+
+### Update Comparison
+
+| Data Size | TMT Time | Merkle Time | TMT TPut | Merkle TPut | TMT Mem | Merkle Mem | Winner |
+|-----------|----------|-------------|----------|-------------|---------|------------|--------|
+| 100       | 0.004    | 0.013       | 245098.04 | 75872.53    | 0.01    | 0.02       | TMT    |
+| 1000      | 0.005    | 0.145       | 183823.53 | 6916.59     | 0.15    | 0.17       | TMT    |
+| 10000     | 0.007    | 1.977       | 140449.44 | 505.69      | 1.45    | 1.68       | TMT    |
+| 50000     | 0.008    | 11.477      | 127877.24 | 87.13       | 7.25    | 8.39       | TMT    |
+
+### Stress Build Comparison
+
+| Data Size | TMT Time | Merkle Time | TMT TPut | Merkle TPut | TMT Mem | Merkle Mem | Winner |
+|-----------|----------|-------------|----------|-------------|---------|------------|--------|
+| 100000    | 156.745  | 148.451     | 637978.07 | 673622.04   | 14.50   | 16.79      | Merkle |
+| 500000    | 578.759  | 524.615     | 863917.45 | 953080.79   | 72.48   | 83.92      | Merkle |
+
+## 🏆 Overall Scores
+
+- **TMT**: 30 points
+- **Merkle**: 12 points
+- **Grand Winner**: TMT
 ## Conclusion
 
 The Ternary Mesh Tree is a powerful, high-performance, and thread-safe data structure for ensuring data integrity. By using a ternary structure, it offers a compelling alternative to traditional binary Merkle trees, with potential advantages in proof compactness and verification speed. Its configurability and robust design make it an excellent choice for demanding applications in blockchain, distributed storage, and beyond.
