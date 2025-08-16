@@ -1,0 +1,12 @@
+[package]
+name = "tmt"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+blake3 = "1.5.0"
+serde = { version = "1.0.219", features = ["derive"] }
+hex = "0.4.3"
+bincode = "2.0.1"
+rand = "0.9.1"
+
